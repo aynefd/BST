@@ -28,13 +28,17 @@ Tree::~Tree()
         root->left = nullptr;
     }
 }
-int Tree::size_helper(Node* r, Node* l) const //FIX DIS
+int Tree::size_helper(Node* n) const
 {
-   
-
-
-        
-    
+    int count =0;
+   if(n==nullptr)
+       return count;
+    else
+    {
+        if(n!=nullptr)
+            count++;
+        return count + size_helper(n->right) + size_helper(n->left);
+    }
 
 }
 int Tree::size()const
@@ -42,7 +46,7 @@ int Tree::size()const
     if(root->is_leaf())
         return 1;
     else
-        return size_helper(root->right, root->left);
+        return size_helper(root);
 }
 bool Node::is_leaf()
 {
@@ -53,6 +57,7 @@ bool Node::is_leaf()
 }
 void Tree::print()
 {
+    assert(root!=nullptr);
     print_helper(root, 0);
     
 }
@@ -130,6 +135,7 @@ void Tree::insert_helper(int d, Node* n)
 
 void Tree::pre_order()
 {
+    assert(root!=nullptr);
     pre_order_helper(root);
 }
 void Tree::pre_order_helper(Node* n)
@@ -146,6 +152,7 @@ void Tree::pre_order_helper(Node* n)
 
 void Tree::post_order()
 {
+    assert(root!=nullptr);
     post_order_helper(root);
     
 }
@@ -155,13 +162,14 @@ void Tree::post_order_helper(Node* n)
         return;
     else
     {
-        pre_order_helper(n->left);
-        pre_order_helper(n->right);
+        post_order_helper(n->left);
+        post_order_helper(n->right);
         cout<<n->data<<endl;
     }
 }
 void Tree::in_order()
 {
+    assert(root!=nullptr);
     in_order_helper(root);
 }
 void Tree::in_order_helper(Node* n)
@@ -171,9 +179,9 @@ void Tree::in_order_helper(Node* n)
     else
     {
         
-        pre_order_helper(n->left);
+        in_order_helper(n->left);
         cout<<n->data<<endl;
-        pre_order_helper(n->right);
+       in_order_helper(n->right);
     }
 }
 bool Tree::is_in(int d)
@@ -218,82 +226,79 @@ bool Tree::erase(int d)
 }
 bool Tree::erase_helper(int d, Node* parent)
 {
-    Node* left_child = parent->left;
-    Node* right_child = parent->right;
-    if(left_child==nullptr && right_child==nullptr)
+    if(parent==nullptr)
         return false;
+    //Node* left_child = parent->left;
+    //Node* right_child = parent->right;
+    //if(parent->is_leaf())
+       // return false;
     else
     {
-        if(left_child!=nullptr && left_child->data==d)
+        Node* left_child = parent->left;
+        Node* right_child = parent->right;
+        if(left_child!=nullptr && left_child->data==d) // if there's a left child, and it's data == d
         {
-            if(left_child->is_leaf())
+            if(left_child->is_leaf()) //if it's a leaf, then we're done
             {
                 delete left_child;
                 parent->left=nullptr;
                 return true;
             }
-            else if(left_child->right!=nullptr && left_child->left!=nullptr)
+            else if(left_child->right!=nullptr && left_child->left!=nullptr) //if we're deleting in the middle of the tree
             {
                 //erase_like_root(left_child, parent, d);
-                if(left_child->left->right==nullptr)
+                if(left_child->left->right==nullptr) //check if there's not a farthest right to be new "root"
                 {
                     left_child->data=left_child->left->data;
-                    if(left_child->left->left==nullptr)
-                        left_child->left = nullptr;
-                    else
-                    {
+                   // if(left_child->left->left==nullptr)
+                       // left_child->left = nullptr;
+                    
                         Node* left = left_child->left->left;
                         delete left_child->left;
                         left_child->left=left;
-                        
-                    }
                     
                     return true;
                 }
-                else
+                else //look for farthest right to be "new root"
                 {
                     int new_left_child = find_new_root(left_child->left, left_child);
                     left_child->data=new_left_child;
                     return true;
                 }
             }
-            else if(left_child->left!=nullptr && left_child->right==nullptr)
+            else if(left_child->left!=nullptr && left_child->right==nullptr)//left child only has left child
             {
                 parent->left=left_child->left;
                 delete left_child;
                 return true;
             }
-            else
+            else //left child only has a right child
             {
                 parent->left=left_child->right;
                 delete left_child;
                 return true;
             }
         }
-        else if(right_child!=nullptr && right_child->data==d)
+        else if(right_child!=nullptr && right_child->data==d) //we're deleteting right child
         {
             
-            if(right_child->is_leaf())
+            if(right_child->is_leaf()) //is it a leaf?
             {
                 delete right_child;
                 parent->right=nullptr;
                 return true;
             }
-            else if(right_child->right!=nullptr && right_child->left!=nullptr)
+            else if(right_child->right!=nullptr && right_child->left!=nullptr) //does it have two children?
             {
                 //if like root
                 if(right_child->left->right==nullptr)
                 {
                     right_child->data=right_child->left->data;
-                    if(right_child->left->left==nullptr)
-                        right_child->left = nullptr;
-                    else
-                    {
+                   
                         Node* left = right_child->left->left;
                         delete right_child->left;
                         right_child->left=left;
-                        
-                    }
+                
 
                     return true;
                 }
@@ -304,20 +309,20 @@ bool Tree::erase_helper(int d, Node* parent)
                     return true;
                 }
             }
-            else if(right_child->left!=nullptr && right_child->right==nullptr)
+            else if(right_child->left!=nullptr && right_child->right==nullptr)//does it only have a left child?
             {
                 parent->right=right_child->left;
                 delete right_child;
                 return true;
             }
-            else
+            else //only has a right child
             {
-                parent->right=left_child->right;
+                parent->right=right_child->right;
                 delete right_child;
                 return true;
             }
         }
-        else
+        else //find the data
         {
             if(parent->data<d)
                 return erase_helper(d, parent->right);
