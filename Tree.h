@@ -24,10 +24,12 @@ private:
     void post_order_helper(Node* n);
     void in_order_helper(Node* n);
     bool is_in_helper(int d, Node* n);
-    bool erase(int d, Node* n);
-    bool erase_root(Node* n);
+    bool erase_helper(int d, Node* parent);
+    bool erase_root(Node*& n);
+    
     int find_new_root(Node* n, Node* p);
-    int size_helper(Node* n, int count) const;
+    int size_helper(Node* r, Node* l) const;
+  
 
     
     
