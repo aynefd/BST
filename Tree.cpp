@@ -28,21 +28,13 @@ Tree::~Tree()
         root->left = nullptr;
     }
 }
-int Tree::size_helper(Node* n, int count) const //FIX DIS
+int Tree::size_helper(Node* r, Node* l) const //FIX DIS
 {
-   //count = 0;
-   if(n==nullptr)
-       return count;
-    else
-    {
-        if(n->right!=nullptr)
-            return size_helper(n->right, count+2);
-        if(n->left!=nullptr)
-            return size_helper(n->left, count+2);
+   
+
+
         
-        return ++count;
-        
-    }
+    
 
 }
 int Tree::size()const
@@ -50,7 +42,7 @@ int Tree::size()const
     if(root->is_leaf())
         return 1;
     else
-        return size_helper(root, 0);
+        return size_helper(root->right, root->left);
 }
 bool Node::is_leaf()
 {
@@ -214,51 +206,165 @@ void Tree::destroy(Node* n)
         delete n;
     }
 }
+
 bool Tree::erase(int d)
 {
+    
+    
    if(d==root->data)
        return erase_root(root);
     else
-        return false;
+        return erase_helper(d, root);
 }
-bool Tree::erase(int d, Node* n)
+bool Tree::erase_helper(int d, Node* parent)
 {
-    return false;
+    Node* left_child = parent->left;
+    Node* right_child = parent->right;
+    if(left_child==nullptr && right_child==nullptr)
+        return false;
+    else
+    {
+        if(left_child!=nullptr && left_child->data==d)
+        {
+            if(left_child->is_leaf())
+            {
+                delete left_child;
+                parent->left=nullptr;
+                return true;
+            }
+            else if(left_child->right!=nullptr && left_child->left!=nullptr)
+            {
+                //erase_like_root(left_child, parent, d);
+                if(left_child->left->right==nullptr)
+                {
+                    left_child->data=left_child->left->data;
+                    if(left_child->left->left==nullptr)
+                        left_child->left = nullptr;
+                    else
+                    {
+                        Node* left = left_child->left->left;
+                        delete left_child->left;
+                        left_child->left=left;
+                        
+                    }
+                    
+                    return true;
+                }
+                else
+                {
+                    int new_left_child = find_new_root(left_child->left, left_child);
+                    left_child->data=new_left_child;
+                    return true;
+                }
+            }
+            else if(left_child->left!=nullptr && left_child->right==nullptr)
+            {
+                parent->left=left_child->left;
+                delete left_child;
+                return true;
+            }
+            else
+            {
+                parent->left=left_child->right;
+                delete left_child;
+                return true;
+            }
+        }
+        else if(right_child!=nullptr && right_child->data==d)
+        {
+            
+            if(right_child->is_leaf())
+            {
+                delete right_child;
+                parent->right=nullptr;
+                return true;
+            }
+            else if(right_child->right!=nullptr && right_child->left!=nullptr)
+            {
+                //if like root
+                if(right_child->left->right==nullptr)
+                {
+                    right_child->data=right_child->left->data;
+                    if(right_child->left->left==nullptr)
+                        right_child->left = nullptr;
+                    else
+                    {
+                        Node* left = right_child->left->left;
+                        delete right_child->left;
+                        right_child->left=left;
+                        
+                    }
+
+                    return true;
+                }
+                else
+                {
+                    int new_left_child = find_new_root(right_child->left, right_child);
+                    right_child->data=new_left_child;
+                    return true;
+                }
+            }
+            else if(right_child->left!=nullptr && right_child->right==nullptr)
+            {
+                parent->right=right_child->left;
+                delete right_child;
+                return true;
+            }
+            else
+            {
+                parent->right=left_child->right;
+                delete right_child;
+                return true;
+            }
+        }
+        else
+        {
+            if(parent->data<d)
+                return erase_helper(d, parent->right);
+            else
+                return erase_helper(d, parent->left);
+                
+        }
+    
+    }
+    return true;
 }
-bool Tree::erase_root(Node* n)
+bool Tree::erase_root(Node*& n)
 {
     if(n->is_leaf())
     {
-        delete root;
-        root=nullptr;
+        delete n;
+        n=nullptr;
         return true;
     }
     else if(n->left==nullptr && n->right!=nullptr)
     {
-        Node* old = root;
-        root=n->right;
+        Node* old = n;
+        n=n->right;
         delete old;
         return true;
     }
     else if(n->left->right==nullptr)
     {
-        Node* old = root;
-        Node* right = root->right;
-        root=n->left;
-        root->right = right;
+        Node* old = n;
+        Node* right = n->right;
+        n=n->left;
+        n->right = right;
         delete old;
         return true;
         
     }
     else
     {
-        int new_root = find_new_root(n->left, root);
-        root->data = new_root;
+        int new_root = find_new_root(n->left, n);
+        n->data = new_root;
         
         
         return true;
     }
 }
+
+
 int Tree::find_new_root(Node* n, Node* p)
 {
     if(n->right==nullptr)
@@ -281,7 +387,6 @@ int Tree::find_new_root(Node* n, Node* p)
     else
         return find_new_root(n->right, n);
         
-    
     
 }
 
