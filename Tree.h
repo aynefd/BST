@@ -7,6 +7,7 @@
 //
 #include "Node.h"
 #include <iostream>
+#include <cassert>
 using namespace std;
 
 
@@ -14,7 +15,7 @@ class Tree
 {
 private:
 //-----------------------Data Members----------------------
-    Node* root;
+    Node* root=nullptr;
     //int theSize;
 //---------------------Helper functions---------------------
     void destroy(Node* n);
@@ -28,7 +29,7 @@ private:
     bool erase_root(Node*& n);
     
     int find_new_root(Node* n, Node* p);
-    int size_helper(Node* r, Node* l) const;
+    int size_helper(Node* n) const;
   
 
     
